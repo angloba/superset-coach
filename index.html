@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Superset Coach</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Superset">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#2456C8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E7EBEF; --surface:#F7F9FB; --ink:#18212C; --muted:#5B6878; --line:#CBD3DC;
+  --accent:#2456C8; --accent-ink:#fff; --ok:#2C8A57; --warn:#B87A0C; --bad:#B8402F;
+  --plate:#DDE3EA;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#12171E; --surface:#1C232D; --ink:#E5EAF0; --muted:#93A0B1; --line:#2E3845;
+    --accent:#6F98F2; --accent-ink:#0E1420; --ok:#5CC08A; --warn:#E3AE45; --bad:#E5725F; --plate:#26303C;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12171E; --surface:#1C232D; --ink:#E5EAF0; --muted:#93A0B1; --line:#2E3845;
+  --accent:#6F98F2; --accent-ink:#0E1420; --ok:#5CC08A; --warn:#E3AE45; --bad:#E5725F; --plate:#26303C;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:17px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 48px}
+h1,h2,h3,.num{font-family:"Barlow Condensed","Arial Narrow",system-ui,sans-serif}
+h1{font-size:2.1rem;font-weight:800;margin:4px 0 2px;letter-spacing:.01em;line-height:1}
+h2{font-size:1.45rem;font-weight:700;margin:28px 0 10px;line-height:1.1}
+h3{font-size:1.5rem;font-weight:700;margin:0;line-height:1.1}
+p{margin:6px 0}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding-bottom:12px;border-bottom:2px solid var(--ink)}
+nav.tabs{display:flex;gap:4px}
+nav.tabs button{background:none;border:0;color:var(--muted);font:600 .95rem "Barlow",sans-serif;padding:8px 10px;border-radius:8px;cursor:pointer}
+nav.tabs button[aria-current="true"]{color:var(--ink);background:var(--plate)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin:12px 0}
+.ss-label{display:flex;align-items:baseline;gap:10px;margin:26px 0 6px}
+.ss-label h2{margin:0}
+.ss-label span{color:var(--muted);font-size:.9rem}
+.ex-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.spec{font-family:"Barlow Condensed",sans-serif;font-size:1.25rem;font-weight:600;color:var(--muted);white-space:nowrap}
+.spec b{color:var(--ink)}
+.plates{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 12px}
+.plate{width:34px;height:34px;border-radius:50%;background:var(--plate);border:2px solid var(--line);display:grid;place-items:center;font:700 .95rem "Barlow Condensed",sans-serif;color:var(--muted)}
+.plate.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.plate.short{background:var(--warn);border-color:var(--warn);color:#fff}
+.plate.now{border-color:var(--accent);color:var(--accent)}
+.logger{display:flex;align-items:center;gap:10px}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg)}
+.stepper button{width:46px;height:56px;border:0;background:none;color:var(--ink);font:700 1.5rem "Barlow Condensed",sans-serif;cursor:pointer}
+.stepper output{min-width:46px;text-align:center;font:800 2rem "Barlow Condensed",sans-serif;line-height:1}
+.btn{appearance:none;border:0;border-radius:12px;padding:0 18px;height:56px;font:700 1.15rem "Barlow Condensed",sans-serif;letter-spacing:.02em;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.grow{flex:1}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:none;color:var(--bad);border:1px solid var(--bad)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.45;cursor:default}
+.link{background:none;border:0;color:var(--muted);font:500 .9rem "Barlow",sans-serif;text-decoration:underline;cursor:pointer;padding:6px 0}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hint{font-size:.88rem;color:var(--muted);margin-top:8px}
+.donebar{display:flex;align-items:center;gap:8px;color:var(--ok);font-weight:600;margin-top:4px}
+.hero-num{font:800 4.2rem/0.9 "Barlow Condensed",sans-serif;letter-spacing:-.01em}
+.plan-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.plan-row:last-child{border-bottom:0}
+.plan-row .n{font:700 1.2rem "Barlow Condensed",sans-serif}
+.result{border-left:4px solid var(--line);padding:4px 0 4px 12px;margin:14px 0}
+.result.up{border-color:var(--ok)}
+.result.hold{border-color:var(--warn)}
+.result.down{border-color:var(--bad)}
+.result .next{font:700 1.2rem "Barlow Condensed",sans-serif}
+label.field{display:block;margin:16px 0}
+label.field span{display:block;font-weight:600;margin-bottom:4px}
+input[type=number],textarea{width:100%;font:500 1.1rem "Barlow",sans-serif;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{font-size:.8rem;min-height:110px;font-family:ui-monospace,Menlo,Consolas,monospace}
+.hist{padding:12px 0;border-bottom:1px solid var(--line)}
+.hist:last-child{border-bottom:0}
+.hist .d{font:700 1.1rem "Barlow Condensed",sans-serif}
+.tag{display:inline-block;font-size:.78rem;font-weight:600;padding:1px 7px;border-radius:6px;margin-left:6px}
+.tag.ok{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.tag.no{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const KEY = 'superset-coach-v1';
+const STEP = 2; // kg
+
+const DEFS = {
+  push:  {name:'Push-ups',    ss:1, type:'bw', sets:10, tip:'Body in one straight line, chest to a fist above the floor, full lockout.'},
+  pull:  {name:'Pull-ups',    ss:2, type:'bw', sets:4,  tip:'Start from a dead hang, chin over the bar, no kipping.'},
+  curl:  {name:'Bicep curls', ss:2, type:'wt', sets:3, low:8,  high:12, tip:'Elbows pinned to your sides, lower over 2–3 seconds.'},
+  shrug: {name:'Shrugs',      ss:2, type:'wt', sets:3, low:10, high:15, tip:'Straight up toward your ears, pause 1 second at the top, no rolling.'}
+};
+const ORDER = ['push','pull','curl','shrug'];
+
+let S = load();
+let view = S.setupDone ? (S.session ? 'workout' : 'home') : 'setup';
+let lastResult = null;
+
+function blank(){ return {setupDone:false, ex:{}, session:null, history:[]}; }
+function load(){
+  try { const raw = localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); if (d && d.ex) return d; } } catch(e){}
+  return blank();
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }
+
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),1800); }
+const kg = w => (Math.round(w*10)/10) + ' kg';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function specText(id, st){
+  const d = DEFS[id];
+  if (d.type==='bw') return `<b>${d.sets}</b> × <b>${st.target}</b> reps`;
+  return `<b>${d.sets}</b> × <b>${st.target}</b> reps @ <b>${kg(st.weight)}</b>`;
+}
+function specPlain(id, st){
+  const d = DEFS[id];
+  if (d.type==='bw') return `${d.sets} sets × ${st.target} reps`;
+  return `${d.sets} × ${st.target}–${d.high} @ ${kg(st.weight)}`;
+}
+
+/* ---------- Coaching logic ---------- */
+function evaluate(id, st, reps){
+  const d = DEFS[id];
+  const r = reps.map(x => x ?? 0);
+  const next = {...st};
+  let verdict, msg;
+
+  if (d.type==='bw'){
+    const success = r.every(x => x >= st.target);
+    const ratio = r.reduce((a,b)=>a+b,0) / (st.target * d.sets);
+    if (success){
+      next.target = st.target + 1; next.fails = 0; verdict='up';
+      msg = `All ${d.sets} sets done. Next workout: ${d.sets} sets × ${next.target} reps.`;
+    } else {
+      next.fails = (st.fails||0) + 1;
+      if (ratio < 0.75 || next.fails >= 2){
+        next.target = Math.max(1, Math.min(st.target-1, Math.floor(st.target*0.88)));
+        next.fails = 0; verdict='down';
+        msg = `Target lowered to ${next.target} so you can complete the full volume and build back up.`;
+      } else {
+        verdict='hold';
+        msg = `Some sets fell short. Same target next time: ${d.sets} sets × ${st.target} reps.`;
+      }
+    }
+    return {success, verdict, msg, next};
+  }
+
+  // weighted: double progression
+  const success = r.every(x => x >= st.target);
+  if (r.every(x => x >= d.high)){
+    next.weight = st.weight + STEP; next.target = d.low; next.fails = 0; verdict='up';
+    msg = `Top of the range on every set. Next workout: ${d.sets} × ${d.low}–${d.low+2} @ ${kg(next.weight)}.`;
+  } else if (success){
+    next.target = Math.min(d.high, Math.min(...r) + 1); next.fails = 0; verdict='up';
+    msg = `Target hit. Next workout: ${d.sets} × ${next.target} reps @ ${kg(st.weight)}.`;
+  } else if (r.some(x => x < d.low)){
+    next.fails = (st.fails||0) + 1;
+    if (next.fails >= 2 && st.weight > STEP){
+      next.weight = st.weight - STEP; next.target = d.low; next.fails = 0; verdict='down';
+      msg = `Two sessions below ${d.low} reps. Weight lowered to ${kg(next.weight)}. Build back up from ${d.low} reps.`;
+    } else {
+      verdict='hold';
+      msg = `Below the ${d.low}-rep floor. Same weight and target next time.`;
+    }
+  } else {
+    next.fails = 0; verdict='hold';
+    msg = `Same weight next time. Aim for ${st.target} reps on all ${d.sets} sets.`;
+  }
+  return {success, verdict, msg, next};
+}
+
+/* ---------- Views ---------- */
+function render(){
+  const app = document.getElementById('app');
+  const tabs = S.setupDone ? `<nav class="tabs">
+      <button data-go="${S.session?'workout':'home'}" aria-current="${view==='home'||view==='workout'||view==='result'}">Train</button>
+      <button data-go="history" aria-current="${view==='history'}">History</button>
+      <button data-go="settings" aria-current="${view==='settings'}">Settings</button>
+    </nav>` : '';
+  app.innerHTML = `<header class="top"><div><h1>Superset Coach</h1></div>${tabs}</header>` + ({
+    setup:viewSetup, home:viewHome, workout:viewWorkout, result:viewResult, history:viewHistory, settings:viewSettings
+  }[view])();
+  bind();
+}
+
+function viewSetup(){
+  return `
+  <h2>Strength test</h2>
+  <p class="muted">Do each test fresh, with strict form, and enter what you got. The app sets conservative starting targets from these numbers.</p>
+  <div class="card">
+    <label class="field"><span>Max push-ups in one set</span>
+      <input type="number" inputmode="numeric" min="0" id="t-push" placeholder="e.g. 25"></label>
+    <label class="field"><span>Max pull-ups in one set</span>
+      <input type="number" inputmode="numeric" min="0" id="t-pull" placeholder="e.g. 6"></label>
+    <label class="field"><span>Heaviest dumbbell you can curl for 10 clean reps (kg)</span>
+      <input type="number" inputmode="decimal" min="2" step="2" id="t-curl" placeholder="e.g. 10"></label>
+    <label class="field"><span>Heaviest dumbbell you can shrug for 15 clean reps (kg)</span>
+      <input type="number" inputmode="decimal" min="2" step="2" id="t-shrug" placeholder="e.g. 20"></label>
+    <p class="hint" id="t-err"></p>
+    <button class="btn block" id="t-go">Set my starting targets</button>
+  </div>
+  <p class="small muted">How it calculates: push-ups start at about 40% of your max per set (10 sets is a lot of volume), pull-ups at about 50%, and weights round down to the nearest 2 kg, starting at the bottom of the rep range.</p>`;
+}
+
+function viewHome(){
+  const rows = ORDER.map(id => `<div class="plan-row"><span>${DEFS[id].name}</span><span class="n">${specText(id,S.ex[id])}</span></div>`);
+  const last = S.history[0];
+  return `
+  <div class="card" style="margin-top:18px">
+    <p class="muted small">Workout ${S.history.length+1}</p>
+    <div class="ss-label" style="margin-top:10px"><h2>Superset 1</h2><span>Push</span></div>
+    ${rows[0]}
+    <div class="ss-label"><h2>Superset 2</h2><span>Pull, arms, traps</span></div>
+    ${rows.slice(1).join('')}
+  </div>
+  <button class="btn block" id="start">Start workout</button>
+  ${last ? `<p class="small muted" style="margin-top:14px">Last workout: ${new Date(last.date).toLocaleDateString()}</p>` : ''}
+  <p class="small muted">In Superset 2, go pull-ups, curls, shrugs back to back, then rest and repeat. Log each set on its card as you finish it.</p>`;
+}
+
+function exCard(id){
+  const d = DEFS[id], st = S.ex[id], log = S.session.logs[id];
+  const cur = log.findIndex(x => x === null);
+  const plates = log.map((x,i) => {
+    const cls = x===null ? (i===cur?'now':'') : (x>=st.target?'done':'short');
+    return `<span class="plate ${cls}" title="Set ${i+1}">${x===null? i+1 : x}</span>`;
+  }).join('');
+  const val = S.session.pending[id] ?? st.target;
+  const body = cur === -1
+    ? `<div class="donebar">✓ All ${d.sets} sets logged</div><button class="link" data-undo="${id}">Undo last set</button>`
+    : `<div class="logger">
+         <div class="stepper" aria-label="Reps for set ${cur+1}">
+           <button data-dec="${id}" aria-label="One less rep">−</button>
+           <output>${val}</output>
+           <button data-inc="${id}" aria-label="One more rep">+</button>
+         </div>
+         <button class="btn grow" data-log="${id}">Set ${cur+1} completed</button>
+       </div>
+       <p class="hint">${val < st.target ? `Logging ${val} of ${st.target} reps. This set counts as short.` : esc(d.tip)}</p>
+       ${cur>0?`<button class="link" data-undo="${id}">Undo last set</button>`:''}`;
+  return `<div class="card">
+    <div class="ex-head"><h3>${d.name}</h3><span class="spec">${specText(id,st)}</span></div>
+    ${d.type==='wt'?`<p class="small muted">Range ${d.low}–${d.high} reps</p>`:''}
+    <div class="plates">${plates}</div>
+    ${body}
+  </div>`;
+}
+
+function viewWorkout(){
+  const all = ORDER.every(id => S.session.logs[id].every(x => x!==null));
+  return `
+  <div class="ss-label"><h2>Superset 1</h2><span>Push</span></div>
+  ${exCard('push')}
+  <div class="ss-label"><h2>Superset 2</h2><span>Pull, arms, traps</span></div>
+  ${exCard('pull')}${exCard('curl')}${exCard('shrug')}
+  ${all ? `<button class="btn block" id="finish">Finish workout</button>`
+        : `<button class="btn ghost block" id="finish-early">End workout early</button>
+           <p class="hint">Sets you don't log count as 0 reps, so targets won't increase for those exercises.</p>`}
+  <button class="link" id="cancel">Discard this workout</button>`;
+}
+
+function viewResult(){
+  const r = lastResult;
+  return `
+  <div style="margin:22px 0 4px"><div class="hero-num">Workout completed</div></div>
+  <p class="muted">Here's what changes next time.</p>
+  ${ORDER.map(id => {
+    const x = r.results[id];
+    return `<div class="result ${x.verdict}">
+      <h3>${DEFS[id].name}</h3>
+      <p class="small muted">${x.reps.join(' / ')} ${DEFS[id].type==='wt'?'@ '+kg(x.weight):''}</p>
+      <p class="next">${esc(x.msg)}</p></div>`;
+  }).join('')}
+  <button class="btn block" data-go="home">Done</button>`;
+}
+
+function viewHistory(){
+  if (!S.history.length) return `<h2>History</h2><p class="muted">Your finished workouts will show up here. Start one from the Train tab.</p>`;
+  return `<h2>History</h2><div class="card">` + S.history.map(h => `
+    <div class="hist"><div class="d">${new Date(h.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}</div>
+    ${ORDER.map(id => { const x=h.results[id]; return `<div class="small">${DEFS[id].name}: ${x.reps.join('/')}${DEFS[id].type==='wt'?' @ '+kg(x.weight):''}
+      <span class="tag ${x.success?'ok':'no'}">${x.success?'target hit':'short'}</span></div>`; }).join('')}
+    </div>`).join('') + `</div>`;
+}
+
+function viewSettings(){
+  return `
+  <h2>Current targets</h2>
+  <div class="card">${ORDER.map(id=>`<div class="plan-row"><span>${DEFS[id].name}</span><span class="n">${specPlain(id,S.ex[id])}</span></div>`).join('')}</div>
+
+  <h2>Backup</h2>
+  <p class="small muted">Progress is saved on this phone only, inside the app. Copy this text somewhere safe (notes app, email to yourself) to keep a backup or move to another device.</p>
+  <textarea id="bk" readonly>${esc(JSON.stringify(S))}</textarea>
+  <div class="row" style="margin-top:8px"><button class="btn ghost" id="copy">Copy backup</button></div>
+
+  <h2>Restore</h2>
+  <p class="small muted">Paste a backup to replace everything on this device.</p>
+  <textarea id="rs" placeholder="Paste backup text here"></textarea>
+  <div class="row" style="margin-top:8px"><button class="btn ghost" id="restore">Restore backup</button></div>
+
+  <h2>Start over</h2>
+  <div class="row">
+    <button class="btn ghost" id="retest">Retake strength test</button>
+    <button class="btn danger" id="reset">Erase all data</button>
+  </div>
+  <p class="small muted" style="margin-top:8px">Retaking the test resets your targets and keeps your history.</p>`;
+}
+
+/* ---------- Actions ---------- */
+function bind(){
+  const $ = s => document.querySelector(s);
+  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { view = b.dataset.go; render(); scrollTo(0,0); });
+
+  if (view==='setup'){
+    $('#t-go').onclick = () => {
+      const v = id => parseFloat($('#t-'+id).value);
+      const p=v('push'), u=v('pull'), c=v('curl'), s=v('shrug');
+      if ([p,u].some(x=>isNaN(x)||x<0) || [c,s].some(x=>isNaN(x)||x<=0)){ $('#t-err').textContent='Fill in all four numbers. Weights must be above 0.'; return; }
+      const rd = w => Math.max(STEP, Math.floor(w/STEP)*STEP);
+      S.ex = {
+        push:{target:Math.max(1,Math.round(p*0.4)), fails:0},
+        pull:{target:Math.max(1,Math.round(u*0.5)), fails:0},
+        curl:{weight:rd(c), target:DEFS.curl.low, fails:0},
+        shrug:{weight:rd(s), target:DEFS.shrug.low, fails:0}
+      };
+      S.setupDone = true; S.session = null; save();
+      if (u===0) toast('Pull-ups: jump to the top, lower slowly over 3–5 s per rep');
+      view='home'; render();
+    };
+  }
+  if (view==='home'){
+    $('#start').onclick = () => {
+      const logs={}; ORDER.forEach(id => logs[id] = Array(DEFS[id].sets).fill(null));
+      S.session = {startedAt:Date.now(), logs, pending:{}}; save(); view='workout'; render();
+    };
+  }
+  if (view==='workout'){
+    document.querySelectorAll('[data-inc]').forEach(b => b.onclick = () => { const id=b.dataset.inc; S.session.pending[id]=(S.session.pending[id]??S.ex[id].target)+1; save(); render(); });
+    document.querySelectorAll('[data-dec]').forEach(b => b.onclick = () => { const id=b.dataset.dec; S.session.pending[id]=Math.max(0,(S.session.pending[id]??S.ex[id].target)-1); save(); render(); });
+    document.querySelectorAll('[data-log]').forEach(b => b.onclick = () => {
+      const id=b.dataset.log, log=S.session.logs[id], i=log.findIndex(x=>x===null);
+      log[i] = S.session.pending[id] ?? S.ex[id].target;
+      delete S.session.pending[id]; save(); render();
+    });
+    document.querySelectorAll('[data-undo]').forEach(b => b.onclick = () => {
+      const log=S.session.logs[b.dataset.undo]; let i=log.findIndex(x=>x===null); i = i===-1?log.length-1:i-1;
+      if (i>=0) log[i]=null; save(); render();
+    });
+    const fin = () => finish();
+    if ($('#finish')) $('#finish').onclick = fin;
+    if ($('#finish-early')) $('#finish-early').onclick = () => { if (confirm('End the workout now? Unlogged sets count as 0 reps.')) fin(); };
+    $('#cancel').onclick = () => { if (confirm('Discard this workout? Nothing will be saved.')) { S.session=null; save(); view='home'; render(); } };
+  }
+  if (view==='settings'){
+    $('#copy').onclick = async () => {
+      const ta=$('#bk'); ta.select();
+      try { await navigator.clipboard.writeText(ta.value); toast('Backup copied'); }
+      catch(e){ try { document.execCommand('copy'); toast('Backup copied'); } catch(_){ toast('Select the text and copy it manually'); } }
+    };
+    $('#restore').onclick = () => {
+      try { const d=JSON.parse($('#rs').value); if(!d||!d.ex||!Array.isArray(d.history)) throw 0;
+        S=d; save(); view=S.setupDone?(S.session?'workout':'home'):'setup'; render(); toast('Backup restored'); }
+      catch(e){ toast('That text isn\'t a valid backup'); }
+    };
+    $('#retest').onclick = () => { if (confirm('Retake the strength test? Your current targets will be replaced.')) { S.setupDone=false; S.session=null; save(); view='setup'; render(); } };
+    $('#reset').onclick = () => { if (confirm('Erase all workouts and targets on this device?')) { S=blank(); save(); view='setup'; render(); } };
+  }
+}
+
+function finish(){
+  const results = {};
+  ORDER.forEach(id => {
+    const st = S.ex[id], reps = S.session.logs[id].map(x=>x??0);
+    const e = evaluate(id, st, reps);
+    results[id] = {target:st.target, weight:st.weight, reps, success:e.success, verdict:e.verdict, msg:e.msg};
+    S.ex[id] = e.next;
+  });
+  const entry = {date:Date.now(), results};
+  S.history.unshift(entry); S.session=null; save();
+  lastResult = entry; view='result'; render(); scrollTo(0,0);
+}
+
+render();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
